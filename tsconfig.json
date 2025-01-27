@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "plugins": [
+      // Transform paths in output .js files
+      { "transform": "typescript-transform-paths" },
+
+      // Transform paths in output .db.ts files (Include this line if you output declarations files)
+      { "transform": "typescript-transform-paths", "afterDeclarations": true }
+    ]
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["server/node_modules"]
+}
