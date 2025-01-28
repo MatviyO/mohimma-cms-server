@@ -206,3 +206,8 @@
 2025-01-26T15:38:28.823Z [[32minfo[39m]: HTTP GET /api/users
 2025-01-26T15:39:02.371Z [[32minfo[39m]: HTTP GET /api/users
 2025-01-26T15:39:39.716Z [[32minfo[39m]: HTTP GET /api/users
+2025-01-28T08:59:10.553Z [[32minfo[39m]: HTTP GET /
+2025-01-28T08:59:23.760Z [[32minfo[39m]: HTTP GET //api/swagger-docs
+2025-01-28T08:59:33.842Z [[32minfo[39m]: HTTP POST /auth/login
+2025-01-28T08:59:50.499Z [[32minfo[39m]: HTTP POST /auth/login
+2025-01-28T09:02:23.149Z [[32minfo[39m]: HTTP POST /api/auth/login

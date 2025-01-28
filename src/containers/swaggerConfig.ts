@@ -17,6 +17,11 @@ const swaggerOptions: SwaggerOptions = {
                 },
             },
         },
+        servers: [
+            {
+                url: "/api",
+            }
+        ],
         security: [
             {
                 bearerAuth: [],
