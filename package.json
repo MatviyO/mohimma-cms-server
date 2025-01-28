@@ -2,15 +2,15 @@
   "name": "server",
   "version": "1.0.0",
   "scripts": {
-    "dev": "server/node_modules/.bin/tsx watch src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "build": "server/node_modules/.bin/tsc",
-    "prisma": "server/node_modules/.bin/prisma db generate",
-    "prisma:push": "server/node_modules/.bin/prisma db push",
-    "prisma:deploy": "server/node_modules/.bin/prisma deploy",
-    "prisma:studio": "server/node_modules/.bin/prisma studio",
-    "prisma:seed": "server/node_modules/.bin/prisma db seed",
-    "seed": "server/node_modules/.bin/tsx prisma/seed.ts"
+    "build": "tsc",
+    "prisma": "prisma db generate",
+    "prisma:push": "prisma db push",
+    "prisma:deploy": "prisma deploy",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "prisma db seed",
+    "seed": "tsx prisma/seed.ts"
   },
   "description": "",
   "dependencies": {

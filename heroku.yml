@@ -1,0 +1,6 @@
+build:
+  source: server
+  script:
+    - yarn install
+    - npm run build
+    - npm run start
