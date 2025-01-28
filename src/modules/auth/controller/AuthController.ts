@@ -4,6 +4,26 @@ import { AuthService } from "../services/AuthService";
 import { TYPES } from "../../../containers/container-types";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
 
+const setAuthCookies = (res: Response, accessToken: string, refreshToken: string) => {
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.cookie("token", accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: ".herokuapp.com",
+        maxAge: 30.44 * 24 * 60 * 60 * 1000, // 1 month
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: ".herokuapp.com",
+        maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 year
+    });
+};
+
 @injectable()
 export class AuthController {
     constructor(@inject(TYPES.AuthService) private authService: AuthService) {}
@@ -13,19 +33,7 @@ export class AuthController {
             const { fullName, email, password } = req.body;
             const tokens = await this.authService.register(fullName, email, password);
 
-            // Set cookies for tokens
-            res.cookie("token", tokens.accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 30.44 * 24 * 60 * 60 * 1000, // 1 month
-            });
-            res.cookie("refreshToken", tokens.refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 year
-            });
+            setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
 
             res.status(201).json({ message: "User registered successfully" });
         } catch (error) {
@@ -38,19 +46,8 @@ export class AuthController {
             const { email, password } = req.body;
             const tokens = await this.authService.login(email, password);
 
-            // Set cookies for tokens
-            res.cookie("token", tokens.accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 30.44 * 24 * 60 * 60 * 1000, // 1 month
-            });
-            res.cookie("refreshToken", tokens.refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 year
-            });
+            // Використовуємо функцію для встановлення cookies
+            setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
 
             res.status(200).json({ message: "Login successful" });
         } catch (error) {
@@ -60,26 +57,14 @@ export class AuthController {
 
     public async refreshToken(req: Request, res: Response) {
         try {
-            const { refreshToken } = req.cookies; // Get refresh token from cookies
+            const { refreshToken } = req.cookies;
             if (!refreshToken) {
                 throw new Error("Refresh token not provided");
             }
 
             const newTokens = await this.authService.refreshToken(refreshToken);
 
-            // Update cookies with new tokens
-            res.cookie("token", newTokens.accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 60 * 60 * 1000, // 1 hour
-            });
-            res.cookie("refreshToken", newTokens.refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-            });
+            setAuthCookies(res, newTokens.accessToken, newTokens.refreshToken);
 
             res.status(200).json({ message: "Token refreshed" });
         } catch (error) {
