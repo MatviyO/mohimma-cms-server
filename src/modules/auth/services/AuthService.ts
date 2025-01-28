@@ -90,7 +90,6 @@ export class AuthService {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            domain: ".herokuapp.com",
             maxAge: 30.44 * 24 * 60 * 60 * 1000, // 1 month
         });
 
@@ -98,7 +97,6 @@ export class AuthService {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            domain: ".herokuapp.com",
             maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 year
         });
     };
