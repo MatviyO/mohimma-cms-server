@@ -2,6 +2,7 @@ import { injectable } from 'inversify';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../../../prisma/prisma-client';
+import {Response} from "express";
 
 @injectable()
 export class AuthService {
@@ -81,4 +82,24 @@ export class AuthService {
 
         return { accessToken, refreshToken };
     }
+
+    public setAuthCookies(res: Response, accessToken: string, refreshToken: string){
+        const isProduction = process.env.NODE_ENV === "production";
+
+        res.cookie("token", accessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            domain: ".herokuapp.com",
+            maxAge: 30.44 * 24 * 60 * 60 * 1000, // 1 month
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            domain: ".herokuapp.com",
+            maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 year
+        });
+    };
 }
