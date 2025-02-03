@@ -30,7 +30,7 @@ export class AuthService {
         return this.generateTokens(user);
     }
 
-    public async login(email: string, password: string) {
+    public async login(email: string, pass: string) {
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
             throw new Error('Invalid email or password');
@@ -40,12 +40,13 @@ export class AuthService {
             throw new Error('Your account is not activated. Please contact an administrator.');
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(pass, user.password);
         if (!isPasswordValid) {
             throw new Error('Invalid email or password');
         }
+        const {password, ...currentUser} = user;
 
-        return this.generateTokens(user);
+        return {...this.generateTokens(user), user: currentUser};
     }
 
     public async refreshToken(token: string) {
@@ -84,8 +85,6 @@ export class AuthService {
     }
 
     public setAuthCookies(res: Response, accessToken: string, refreshToken: string){
-        const isProduction = process.env.NODE_ENV === "production";
-
         res.cookie("token", accessToken, {
             httpOnly: true,
             secure: true,
@@ -100,4 +99,19 @@ export class AuthService {
             maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 year
         });
     };
+
+    public async getUserById(userId: number) {
+        return prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+                role: true,
+                isActive: true,
+                createdAt: true,
+                updatedAt: true,
+            }
+        });
+    }
 }

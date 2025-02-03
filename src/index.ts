@@ -24,12 +24,15 @@ const app: Express = express();
 const port = process.env.PORT || 3000;
 const specs = swaggerJsdoc(swaggerOptions);
 
+const isProduction = process.env.NODE_ENV === 'production';
+const clientUrl = isProduction ? process.env.CLIENT_URL_PROD : process.env.CLIENT_URL_LOCAL;
+
 // Middleware
 app.use('/api/swagger-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use(cookieParser());
 app.use(
     cors({
-        origin: process.env.CLIENT_URL || "http://localhost:3000",
+        origin: clientUrl,
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],

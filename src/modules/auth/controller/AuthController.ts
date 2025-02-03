@@ -11,9 +11,7 @@ export class AuthController {
     public async register(req: Request, res: Response) {
         try {
             const { fullName, email, password } = req.body;
-            const tokens = await this.authService.register(fullName, email, password);
-
-            this.authService.setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
+            await this.authService.register(fullName, email, password);
 
             res.status(201).json({ message: "User registered successfully" });
         } catch (error) {
@@ -24,11 +22,11 @@ export class AuthController {
     public async login(req: Request, res: Response) {
         try {
             const { email, password } = req.body;
-            const tokens = await this.authService.login(email, password);
+            const {user, ...tokens} = await this.authService.login(email, password);
 
             this.authService.setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
 
-            res.status(200).json({ message: "Login successful" });
+            res.status(200).json({ message: "Login successful", data: user });
         } catch (error) {
             res.status(400).json({ error: getErrorMessage(error) });
         }
@@ -50,4 +48,47 @@ export class AuthController {
             res.status(400).json({ error: getErrorMessage(error) });
         }
     }
+
+    public async logout(req: Request, res: Response) {
+        try {
+            res.clearCookie("token", {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+                path: "/"
+            });
+
+            res.clearCookie("refreshToken", {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+                path: "/"
+            });
+
+            res.status(200).json({ message: "Logged out successfully" });
+        } catch (error) {
+            res.status(400).json({ error: getErrorMessage(error) });
+        }
+    }
+
+    public async me(req: Request, res: Response) {
+        try {
+            const userId = req.user?.id;
+
+            if (!userId) {
+                res.status(401).json({ error: "Unauthorized" });
+            }
+
+            const user = await this.authService.getUserById(Number(userId));
+
+            if (!user) {
+                res.status(404).json({ error: "User not found" });
+            }
+
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(500).json({ error: "Failed to fetch user data" });
+        }
+    }
+
 }
