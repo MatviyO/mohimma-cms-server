@@ -1,15 +1,14 @@
-import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
-    const authHeader = req.headers.authorization;
+    const token =
+        req.cookies?.token || req.headers.authorization?.split(" ")[1];
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!token) {
         res.status(401).json({ error: "Unauthorized" });
         return;
     }
-
-    const token = authHeader.split(" ")[1];
 
     try {
         const secret = process.env.JWT_SECRET || "default_secret";
@@ -17,6 +16,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
         req.user = payload;
         next();
     } catch (error) {
-        res.status(401).json({ error: "Invalid token" });
+        console.log(error)
+        res.status(401).json({ error: "Token expired, please log in again" });
     }
 };
