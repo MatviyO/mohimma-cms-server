@@ -2,7 +2,7 @@
  * @swagger
  * /users:
  *   get:
- *     summary: Get all users
+ *     summary: Get all users document
  *     tags: [Users]
  *     responses:
  *       200:
