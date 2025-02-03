@@ -313,3 +313,5 @@
 2025-02-03T20:37:21.877Z [[32minfo[39m]: HTTP GET /api/auth/me
 2025-02-03T20:37:21.985Z [[32minfo[39m]: HTTP GET /api/auth/me
 2025-02-03T20:37:23.829Z [[32minfo[39m]: HTTP GET /api/users
+2025-02-03T20:42:46.283Z [[32minfo[39m]: HTTP GET /api/users
+2025-02-03T20:49:23.111Z [[32minfo[39m]: HTTP GET /api/users

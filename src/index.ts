@@ -26,13 +26,23 @@ const specs = swaggerJsdoc(swaggerOptions);
 
 const isProduction = process.env.NODE_ENV === 'production';
 const clientUrl = isProduction ? process.env.CLIENT_URL_PROD : process.env.CLIENT_URL_LOCAL;
+const allowedOrigins = [
+    "https://mohimma-cms.vercel.app/",
+    "https://mohimma-akjs3631e-matviyos-projects.vercel.app/",
+];
 
 // Middleware
 app.use('/api/swagger-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use(cookieParser());
 app.use(
     cors({
-        origin: clientUrl,
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
