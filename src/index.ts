@@ -32,7 +32,13 @@ app.use('/api/swagger-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use(cookieParser());
 app.use(
     cors({
-        origin: "*",
+        origin: (origin, callback) => {
+            if (!origin) {
+                // Дозволяє запити без origin (наприклад, мобільні додатки, сервери)
+                return callback(null, true);
+            }
+            return callback(null, true); // Дозволити будь-який origin
+        },
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
