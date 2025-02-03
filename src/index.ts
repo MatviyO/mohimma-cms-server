@@ -28,6 +28,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const clientUrl = isProduction ? process.env.CLIENT_URL_PROD : process.env.CLIENT_URL_LOCAL;
 
 // Middleware
+app.set("trust proxy", 1);
 app.use('/api/swagger-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use(cookieParser());
 app.use(
