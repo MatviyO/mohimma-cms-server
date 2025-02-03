@@ -27,17 +27,17 @@ export class AuthController {
             res.cookie("token", tokens.accessToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: "none",
-                maxAge: 30.44 * 24 * 60 * 60 * 1000, // 1 month
-                domain: 'https://mohimma-cms.vercel.app'
+                sameSite: "none", // Важливо для крос-доменних запитів
+                maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 рік
+                domain: '.vercel.app' // Узагальнений домен Vercel
             });
 
             res.cookie("refreshToken", tokens.refreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: "none",
-                maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 year
-                domain: 'https://mohimma-cms.vercel.app'
+                sameSite: "none", // Важливо для крос-доменних запитів
+                maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 рік
+                domain: '.vercel.app' // Узагальнений домен Vercel
             });
 
             res.status(200).json({ message: "Login successful", data: user });
