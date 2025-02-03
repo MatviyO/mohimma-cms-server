@@ -71,6 +71,7 @@ export class AuthController {
         }
     }
 
+
     public async me(req: Request, res: Response) {
         try {
             const userId = req.user?.id;
