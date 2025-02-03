@@ -3,9 +3,17 @@ import { injectable, inject } from 'inversify';
 import { AuthService } from "../services/AuthService";
 import { TYPES } from "../../../containers/container-types";
 import { getErrorMessage } from "../../../utils/getErrorMessage";
+import {prisma} from "../../../../prisma/prisma-client";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 @injectable()
 export class AuthController {
+    private readonly jwtSecret = process.env.JWT_SECRET || 'default_secret';
+    private readonly refreshSecret = process.env.REFRESH_SECRET || 'default_refresh_secret';
+    private readonly tokenExpiry = '1y';
+    private readonly refreshExpiry = '1y';
+
     constructor(@inject(TYPES.AuthService) private authService: AuthService) {}
 
     public async register(req: Request, res: Response) {
@@ -22,61 +30,58 @@ export class AuthController {
     public async login(req: Request, res: Response) {
         try {
             const { email, password } = req.body;
-            const {user, ...tokens} = await this.authService.login(email, password);
+            const user = await prisma.user.findUnique({ where: { email } });
 
-            res.cookie("token", tokens.accessToken, {
-                httpOnly: true,
-                secure: true,
-                sameSite: "none",
-                maxAge: 30.44 * 24 * 60 * 60 * 1000, // 1 month
+            if (!user) {
+                res.status(400).json({ error: "Invalid email or password" });
+                return;
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            if (!isPasswordValid) {
+               res.status(400).json({ error: "Invalid email or password" });
+                return;
+            }
+
+            const { password: _, ...userData } = user;
+            const tokens = this.generateTokens(user);
+
+            res.status(200).json({
+                message: "Login successful",
+                user: userData,
+                ...tokens
             });
-
-            res.cookie("refreshToken", tokens.refreshToken, {
-                httpOnly: true,
-                secure: true,
-                sameSite: "none",
-                maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 year
-            });
-
-            res.status(200).json({ message: "Login successful", data: user });
         } catch (error) {
-            res.status(400).json({ error: getErrorMessage(error) });
+            res.status(500).json({ error: getErrorMessage(error) });
         }
     }
 
     public async refreshToken(req: Request, res: Response) {
         try {
-            const { refreshToken } = req.cookies;
+            const { refreshToken } = req.body;
             if (!refreshToken) {
-                throw new Error("Refresh token not provided");
+                res.status(400).json({ error: "Refresh token is required" });
+                return;
             }
 
-            const newTokens = await this.authService.refreshToken(refreshToken);
+            const decoded = jwt.verify(refreshToken, this.refreshSecret) as { id: number };
+            const user = await prisma.user.findUnique({ where: { id: decoded.id } });
 
-            this.authService.setAuthCookies(res, newTokens.accessToken, newTokens.refreshToken);
+            if (!user) {
+                res.status(401).json({ error: "Invalid refresh token" });
+                return;
+            }
 
-            res.status(200).json({ message: "Token refreshed" });
+            const newTokens = this.generateTokens(user);
+
+            res.status(200).json(newTokens);
         } catch (error) {
-            res.status(400).json({ error: getErrorMessage(error) });
+            res.status(401).json({ error: "Invalid refresh token" });
         }
     }
 
     public async logout(req: Request, res: Response) {
         try {
-            res.clearCookie("token", {
-                httpOnly: true,
-                secure: true,
-                sameSite: "none",
-                path: "/"
-            });
-
-            res.clearCookie("refreshToken", {
-                httpOnly: true,
-                secure: true,
-                sameSite: "none",
-                path: "/"
-            });
-
             res.status(200).json({ message: "Logged out successfully" });
         } catch (error) {
             res.status(400).json({ error: getErrorMessage(error) });
@@ -102,6 +107,22 @@ export class AuthController {
         } catch (error) {
             res.status(500).json({ error: "Failed to fetch user data" });
         }
+    }
+
+    private generateTokens(user: { id: number; email: string; role: string }) {
+        const accessToken = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            this.jwtSecret,
+            { expiresIn: this.tokenExpiry }
+        );
+
+        const refreshToken = jwt.sign(
+            { id: user.id },
+            this.refreshSecret,
+            { expiresIn: this.refreshExpiry }
+        );
+
+        return { accessToken, refreshToken };
     }
 
 }
