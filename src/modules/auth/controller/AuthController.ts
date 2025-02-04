@@ -29,7 +29,6 @@ export class AuthController {
                 secure: true,
                 sameSite: "none", // Важливо для крос-доменних запитів
                 maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 рік
-                domain: '.vercel.app' // Узагальнений домен Vercel
             });
 
             res.cookie("refreshToken", tokens.refreshToken, {
@@ -37,7 +36,6 @@ export class AuthController {
                 secure: true,
                 sameSite: "none", // Важливо для крос-доменних запитів
                 maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 рік
-                domain: '.vercel.app' // Узагальнений домен Vercel
             });
 
             res.status(200).json({ message: "Login successful", data: user });
