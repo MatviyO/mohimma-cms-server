@@ -38,7 +38,7 @@ export class AuthController {
                 maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 рік
             });
 
-            res.status(200).json({ message: "Login successful", data: user });
+            res.status(200).json({ message: "Login successful", data: {user, ...tokens},  });
         } catch (error) {
             res.status(400).json({ error: getErrorMessage(error) });
         }
