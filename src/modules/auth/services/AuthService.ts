@@ -89,7 +89,7 @@ export class AuthService {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            maxAge: 30.44 * 24 * 60 * 60 * 1000, // 1 month
+            maxAge: 365.25 * 24 * 60 * 60 * 1000, // 1 year
         });
 
         res.cookie("refreshToken", refreshToken, {
